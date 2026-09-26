@@ -195,6 +195,7 @@ app.use(securityHeaders);
 app.use(responseTime);
 // Set X-API-Version on every response before route handlers run
 app.use(apiVersion);
+app.use(versionRouting);
 // Configure Express body parser with per-route JSON payload size limits.
 // Upload endpoints (player registration, milestone evidence) accept larger payloads.
 // Auth endpoints are restricted to prevent DoS via large JWT bodies.
