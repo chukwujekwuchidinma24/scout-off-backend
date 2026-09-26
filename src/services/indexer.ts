@@ -232,6 +232,7 @@ export async function indexEvents(): Promise<void> {
       event.contractId,
     );
     const eventInserted = insertResult.changes > 0;
+    if (!eventInserted) return;
     onAfterInsert(eventId);
 
     await withRestoredCorrelation(
