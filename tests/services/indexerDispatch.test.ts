@@ -79,6 +79,25 @@ describe('indexEvents — milestone_approved webhook dispatch', () => {
     expect(mockedDispatch).toHaveBeenCalledWith('milestone_approved', { player_id: 'P3' });
   });
 
+  it('scans stored approvals once when processing a batch of approvals', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const dbModule = require('../../src/db');
+    const queryEventsSpy = jest.spyOn(dbModule, 'queryEvents');
+    server.getEvents.mockResolvedValue({
+      events: [
+        makeEvent('milestone_approved', { player_id: 'P-COUNT' }, 'hash-count-001', 120),
+        makeEvent('milestone_approved', { player_id: 'P-COUNT' }, 'hash-count-002', 121),
+        makeEvent('milestone_approved', { player_id: 'P-COUNT' }, 'hash-count-003', 122),
+      ],
+    });
+
+    await indexEvents();
+
+    expect(queryEventsSpy).toHaveBeenCalledTimes(1);
+    expect(queryEventsSpy).toHaveBeenCalledWith('milestone_approved');
+    queryEventsSpy.mockRestore();
+  });
+
   it('does not dispatch a webhook for non-milestone_approved events', async () => {
     server.getEvents.mockResolvedValue({
       events: [makeEvent('player_registered', { player_id: 'P1', wallet: 'GWALLETP1AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' }, 'hash-005')],
